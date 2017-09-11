@@ -94,7 +94,7 @@
                     </div>
                     <div id="reply">
                         {% if username %}
-                            <textarea class="ans_con" ></textarea><br>
+                            <div class="ans_con" id="editor">
                             <button type="submit" id="submit" data-aid="{{ article.id }}"><span class="tip"> 评论 </span></button>
                             <script type="text/javascript" src="http://mat1.gtimg.com/libs/jquery/1.12.0/jquery.min.js"></script>
                             <script type="text/javascript" >
@@ -126,6 +126,12 @@
                                 window.location.reload ( true );  
                             })
                             </script>
+                            <script src="//unpkg.com/wangeditor/release/wangEditor.min.js"></script>
+                                                <script>
+                                                var E = window.wangEditor
+                                                var editor2 = new E('#editor')
+                                                editor2.create()
+                                                </script>
                         {% else %}
                             <span style="background-color:aqua">请登录后评论.<a href="/user/login">登录</a></span>
                         {% endif %}
