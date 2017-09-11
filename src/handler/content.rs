@@ -107,9 +107,9 @@ pub fn article_list() -> Vec<Uarticle> {
             updatetime: row.get(8),
             username: row.get(9),
         };
-        result.username = result.username.html_entities();
-        result.content = result.content.html_entities();
-        result.title = result.title.html_entities();
+//        result.username = result.username.html_entities();
+//        result.content = result.content.html_entities();
+//        result.title = result.title.html_entities();
         article_result.push(result);
     }
     article_result
@@ -143,9 +143,9 @@ pub fn get_article_by_aid(aid: i32) -> Uarticle {
             username: row.get(9),
         };
     }
-    article_result.content = article_result.content.html_entities();
-    article_result.title = article_result.title.html_entities();
-    article_result.username = article_result.username.html_entities();
+//    article_result.content = article_result.content.html_entities();
+//    article_result.title = article_result.title.html_entities();
+//    article_result.username = article_result.username.html_entities();
     article_result
 }
 
@@ -161,8 +161,8 @@ pub fn get_comment_by_aid(aid: i32) -> Vec<Ucomment> {
             createtime: row.get(4),
             username: row.get(5),
         };
-        comment_result.content = comment_result.content.html_entities();
-        comment_result.username = comment_result.username.html_entities();
+//        comment_result.content = comment_result.content.html_entities();
+//        comment_result.username = comment_result.username.html_entities();
         result.push(comment_result);
     }
     result

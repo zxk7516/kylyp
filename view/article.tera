@@ -71,44 +71,43 @@
                     </div>
                     <div id="reply">
                         {% if username %}
-                            <div class="ans_con" id="editor">
+                            <div class="ans_con" id="editor"></div>
                             <button type="submit" id="submit" data-aid="{{ article.id }}"><span class="tip"> 评论 </span></button>
                             <script type="text/javascript" src="http://mat1.gtimg.com/libs/jquery/1.12.0/jquery.min.js"></script>
-                            <script type="text/javascript" >
-                            var running = false;
-                            $('#submit').on('click', function(){
-                                if(running) return;
-                                running = true;
-                                $('.tip').text('');
-
-                                var ans_con = $('.ans_con').val();
-                                if(!ans_con){
-                                $('.tip').text('*输入不能为空');
-                                return;
-                                }
-                                $('.tip').text('数据正在提交中...');
-                                
-                                var aid = $(this).data('aid');
-
-                                $.ajax({
-                                async: false,
-                                url : '/article/addcomment',
-                                data : {aid:aid, content:ans_con},
-                                dataType : 'json',
-                                type : 'get'
-                                }).done(function(){
-                                
-                                running = false;
-                                })
-                                window.location.reload ( true );  
-                            })
-                            </script>
                             <script src="//unpkg.com/wangeditor/release/wangEditor.min.js"></script>
-                                                <script>
-                                                var E = window.wangEditor
-                                                var editor2 = new E('#editor')
-                                                editor2.create()
-                                                </script>
+                            <script type="text/javascript" >
+                           var E = window.wangEditor
+                                                                           var editor2 = new E('#editor')
+                                                                           editor2.create()
+                            var running = false;
+                                                        $('#submit').on('click', function(){
+                                                            if(running) return;
+                                                            running = true;
+                                                            $('.tip').text('');
+
+                                                            var ans_con = editor2.txt.text();
+                                                            if(!ans_con){
+                                                            $('.tip').text('*输入不能为空');
+                                                            return;
+                                                            }
+                                                            $('.tip').text('数据正在提交中...');
+
+                                                            var aid = $(this).data('aid');
+
+                                                            $.ajax({
+                                                            async: false,
+                                                            url : '/article/addcomment',
+                                                            data : {aid:aid, content:ans_con},
+                                                            dataType : 'json',
+                                                            type : 'get'
+                                                            }).done(function(){
+
+                                                            running = false;
+                                                            })
+                                                            window.location.reload ( true );
+                                                        })
+
+                            </script>
                         {% else %}
                             <span style="background-color:aqua">请登录后评论.<a href="/user/login">登录</a></span>
                         {% endif %}
