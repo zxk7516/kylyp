@@ -68,9 +68,22 @@
                                     <span id="title">
                                         <input type="text" name="title" placeholder="请输入标题">
                                     </span>
-                            </div>    
+                            </div>
                             <div id="new">
-                                <textarea name="content" data-provide="markdown" rows="20"></textarea>
+                                <div class="ans_con" id="editor" name="content"></div>
+                                <textarea style="display:none" id="hidden" name="content" data-provide="markdown" rows="20"></textarea>
+                                <script src="//unpkg.com/wangeditor/release/wangEditor.min.js"></script>
+                                <script type="text/javascript" src="http://mat1.gtimg.com/libs/jquery/1.12.0/jquery.min.js"></script>
+                                <script type="text/javascript" >
+                                    var E = window.wangEditor
+                                    var editor2 = new E('#editor')
+                                    editor2.create()
+                                    $(document).ready(function(){
+                                         $('#form').submit(function(){
+                                               $("#hidden").text(editor2.txt.text())
+                                         })
+                                    })
+                                </script>
                             </div>
                             <div class="form-group hidden text-danger" id="error">
                             </div>
@@ -118,9 +131,9 @@
             </div>
         </main>
     
-         <span id="nav_left">
-                <li class="menu-item"><a>文档</a></li>
-                <li class="menu-item"><a>新闻</a></li>
+        <span id="nav_left">
+                <li class="menu-item"><a href="/doc">文档</a></li>
+                <li class="menu-item"><a href="/news">新闻</a></li>
         </span>
         {% if username %}
         <span id="primary_nav">

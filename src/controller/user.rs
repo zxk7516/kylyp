@@ -1,26 +1,27 @@
 use diesel;
 use diesel::prelude::*;
 use rocket_contrib::Template;
-use rocket::request::{self,Form, FlashMessage,FromRequest,Request};
-use rocket::response::{Redirect,Flash};
+use rocket::request::{self, Form, FlashMessage, FromRequest, Request};
+use rocket::response::{Redirect, Flash};
 use model::db::establish_connection;
 use model::pg::get_conn;
-use model::user::{User,NewUser};
-use model::article::{Article,Comment};
+use model::user::{User, NewUser};
+use model::article::{Article, Comment};
 use rocket::http::{Cookie, Cookies};
 use rocket::http::RawStr;
 use std::collections::HashMap;
 use rocket::outcome::IntoOutcome;
 use chrono::prelude::*;
-use handler::content::{UserComment,UserMessage,get_user_info,get_user_articles,get_user_comments,get_user_messages};
+use handler::content::{UserComment, UserMessage, get_user_info, get_user_articles, get_user_comments, get_user_messages};
 
-#[derive(Debug,Serialize)]
+#[derive(Debug, Serialize)]
 pub struct Uid {
     id: i32,
 }
 
 #[derive(Debug)]
 pub struct UserOr(pub String);
+
 #[derive(Debug)]
 pub struct UserId(pub i32);
 
@@ -35,6 +36,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for UserOr {
             .or_forward(())
     }
 }
+
 impl<'a, 'r> FromRequest<'a, 'r> for UserId {
     type Error = ();
 
@@ -55,11 +57,12 @@ struct UserRegister {
     password2: String,
 }
 
-#[derive(FromForm,Debug)]
+#[derive(FromForm, Debug)]
 struct UserLogin {
     username: String,
     password: String,
 }
+
 #[derive(Serialize)]
 struct UserInfo {
     login_user: Option<User>,
@@ -70,17 +73,8 @@ struct UserInfo {
     user_id: i32,
 }
 
-#[get("/<name>",rank = 3)]
-pub fn user_page(name: &RawStr,flash: Option<FlashMessage>) -> Template {
-   let mut context = HashMap::new();
-    if let Some(ref msg) = flash {
-        context.insert("flash", msg.msg().to_string());
-    }
-    Template::render("login", &context)
-}
-
 #[get("/<name>")]
-pub fn user_page_login(name: &RawStr,user: UserOr,user_id: UserId,flash: Option<FlashMessage>) -> Template {
+pub fn user_page_login(name: &RawStr, user: UserOr, user_id: UserId, flash: Option<FlashMessage>) -> Template {
     if name == &user_id.0.to_string() {
         let this_user = get_user_info(&user_id);
         let articles = get_user_articles(&user_id);
@@ -95,10 +89,10 @@ pub fn user_page_login(name: &RawStr,user: UserOr,user_id: UserId,flash: Option<
             user_id: user_id.0,
         };
         Template::render("user", &context)
-    }else{
+    } else {
         let mut context = HashMap::new();
         if let Some(ref msg) = flash {
-            context.insert("flash","该用户不存在".to_string());
+            context.insert("flash", "该用户不存在".to_string());
         }
         Template::render("login", &context)
     }
@@ -130,27 +124,28 @@ pub fn login(flash: Option<FlashMessage>) -> Template {
 }
 
 #[get("/login")]
-pub fn login_user(user: UserOr) -> Template {
-    let mut context = HashMap::new();
-    context.insert("username", user.0);
-    Template::render("index", &context)
+pub fn login_user(user: UserId) -> Redirect {
+    //    let mut context = HashMap::new();
+    //    context.insert("username", user.0);
+    Redirect::to(&*("/user/".to_string() + &*user.0.to_string()))
+    //    Template::render("index", &context)
 }
 
-#[post("/register",data = "<user_form>")]
-fn register_post(user_form: Form< UserRegister>) -> Result<Redirect, String> {
+#[post("/register", data = "<user_form>")]
+fn register_post(user_form: Form<UserRegister>) -> Result<Redirect, String> {
     let post_user = user_form.get();
     use utils::schema::users;
     if &post_user.password == &post_user.password2 {
-            let connection = establish_connection();
-            let new_user = NewUser {
-                email: &post_user.email,
-                username: &post_user.username,
-                password: &post_user.password,
-                regtime: &Local::now().to_string(),
-            };
-            diesel::insert(&new_user).into(users::table).execute(&connection).expect("User is  Exist!");
-            Ok(Redirect::to("/user/login"))
-    }else {
+        let connection = establish_connection();
+        let new_user = NewUser {
+            email: &post_user.email,
+            username: &post_user.username,
+            password: &post_user.password,
+            regtime: &Local::now().to_string(),
+        };
+        diesel::insert(&new_user).into(users::table).execute(&connection).expect("User is  Exist!");
+        Ok(Redirect::to("/user/login"))
+    } else {
         Err("password != password2".to_string())
     }
 }
@@ -159,20 +154,19 @@ fn register_post(user_form: Form< UserRegister>) -> Result<Redirect, String> {
 fn login_post(mut cookies: Cookies, user_form: Form<UserLogin>) -> Flash<Redirect> {
     let post_user = user_form.get();
     let conn = get_conn();
-    let mut uid = Uid {id : 0};
-    for row in &conn.query("SELECT id FROM users WHERE username =$1  AND password = $2", &[&post_user.username,&post_user.password]).unwrap() {
+    let mut uid = Uid { id: 0 };
+    for row in &conn.query("SELECT id FROM users WHERE username =$1  AND password = $2", &[&post_user.username, &post_user.password]).unwrap() {
         uid = Uid {
-            id : row.get(0),
+            id: row.get(0),
         };
     }
     if uid.id != 0 {
-            cookies.add_private(Cookie::new("user_id",uid.id.to_string() ));
-            cookies.add_private(Cookie::new("username",post_user.username.to_string() ));
-            Flash::success(Redirect::to("/"), "Successfully logged in")
-            
-    }else {
-            Flash::error(Redirect::to("/user/login"), "Incorrect")
-    } 
+        cookies.add_private(Cookie::new("user_id", uid.id.to_string()));
+        cookies.add_private(Cookie::new("username", post_user.username.to_string()));
+        Flash::success(Redirect::to("/"), "Successfully logged in")
+    } else {
+        Flash::error(Redirect::to("/user/login"), "Incorrect")
+    }
 }
 
 // -------------- 方法二 -------------
